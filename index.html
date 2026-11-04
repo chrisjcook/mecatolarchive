@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Mecatol Archive</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 88%27%3E%3Cpath fill=%27%23e9c46a%27 d=%27M25 0h50l25 44-25 44H25L0 44z%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Saira:wght@400;500;600;700&family=Saira+Condensed:wght@500;600;700&family=Spectral:ital@1&display=swap">
+<style id="css">:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: the galaxy map sits beside the throne, then ledgers run down one 1180px column.
+   One dark world by choice: deep hull blue, Imperial gold for anything won. */
+:root{
+  color-scheme:dark;
+  --void:#0a0f24; --hull:#121a36; --plate:#1a2447; --line:#2d3963; --ink:#e9ecf6; --dim:#aab3cf; --faint:#8894b8;
+  --gold:#e9c46a; --gold-ink:#1b1608; --gold-wash:#3b3220; --signal:#86c5f0; --danger:#f08a7c;
+  --p1:#3987e5; --p2:#d95926; --p3:#199e70; --p4:#9085e9; --p5:#e66767; --p6:#2f9e2f; --p7:#d55181; --p8:#c98500;
+  --c-black:#20232e; --c-blue:#3f7fe0; --c-green:#2fa05a; --c-orange:#e07a2c; --c-pink:#e87fb4; --c-purple:#8f5fd6; --c-red:#d8423f; --c-yellow:#e8c93f;
+  --display:'Michroma','Eurostile','Bank Gothic','Trebuchet MS',sans-serif;
+  --ui:'Saira','Segoe UI',Roboto,system-ui,sans-serif;
+  --cond:'Saira Condensed','Arial Narrow','Roboto Condensed',sans-serif;
+  --flavor:'Spectral','Iowan Old Style',Georgia,serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:radial-gradient(1200px 680px at 80% -12%,#1c2960 0%,transparent 68%),radial-gradient(900px 620px at -10% 30%,#171c4a 0%,transparent 60%),var(--void);background-attachment:fixed;color:var(--ink);font:400 15.5px/1.55 var(--ui)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--void)}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+a{color:var(--signal);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance;font-weight:400}
+p{margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* command bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:rgba(10,15,36,.92);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;font:400 .86rem/1 var(--display);letter-spacing:.06em;color:var(--ink)}
+.brand:hover{text-decoration:none}
+.brand i{width:20px;height:18px;background:var(--gold);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+nav{display:flex;gap:2px;flex:1 1 auto;min-width:0}
+nav a{font:600 .95rem/1 var(--cond);letter-spacing:.09em;text-transform:uppercase;color:var(--dim);padding:8px 10px;border-bottom:2px solid transparent}
+nav a:hover{color:var(--ink);text-decoration:none}
+nav a[aria-current=page]{color:var(--gold);border-color:var(--gold)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:600 .95rem/1 var(--cond);letter-spacing:.08em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--line);background:var(--plate);color:var(--ink);cursor:pointer;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.btn:hover{background:var(--line);text-decoration:none}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.btn.gold:hover{background:#f2d486}
+.btn.ghost{background:transparent;color:var(--dim)}
+.btn.danger{color:var(--danger);border-color:#6b3b3b;background:transparent}
+.btn[disabled]{opacity:.55;cursor:progress}
+
+main{padding-block:28px 24px;display:grid;gap:44px}
+main>*{min-width:0}
+.eyebrow{font:600 .88rem/1.2 var(--cond);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+h2.sec{font:400 1.02rem/1.3 var(--display);letter-spacing:.03em;color:var(--ink)}
+.sec-head{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.note{color:var(--dim);font-size:.93rem;max-width:68ch}
+.flavor{font:italic 400 1.1rem/1.5 var(--flavor);color:var(--dim);max-width:52ch}
+.na{color:var(--faint);font-family:var(--cond);letter-spacing:.04em}
+.two{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:32px}
+.two.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+
+/* throne + galaxy */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,600px);gap:24px 40px;align-items:center}
+.throne{display:grid;gap:14px}
+.throne h1{font:400 clamp(2rem,5.4vw,3.4rem)/1.08 var(--display);color:var(--gold);overflow-wrap:anywhere}
+.throne .held{font:500 1.15rem/1.3 var(--ui)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:8px}
+.tile{background:var(--hull);padding:12px 14px;display:grid;gap:2px;align-content:start}
+.tile b{font:600 1.75rem/1.1 var(--ui)}
+.tile b.na-v{font:500 1.15rem/1.5 var(--cond);color:var(--faint);letter-spacing:.04em}
+.tile b small{font:500 .95rem var(--ui);color:var(--dim)}
+.tile span{font:500 .92rem/1.25 var(--cond);letter-spacing:.05em;color:var(--dim)}
+.tile em{font:400 .84rem/1.3 var(--ui);color:var(--faint);font-style:normal}
+.tiles.habits{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:0}
+.tiles.habits .tile b{font-size:1.2rem;line-height:1.5}
+.tiles.sets{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:0}
+.meter{height:6px;background:var(--plate);margin-top:6px;border-radius:3px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--gold);border-radius:3px}
+
+.galaxy{width:100%;display:block;height:auto;overflow:visible}
+.hx path{fill:var(--hull);fill-opacity:.55;stroke:var(--line);stroke-width:1.4;transition:fill .15s,stroke .15s}
+.hx text{fill:var(--faint);font-family:var(--cond);font-size:13.5px;font-weight:500;text-anchor:middle;letter-spacing:.01em;pointer-events:none}
+.hx .sub{font-size:11px;font-weight:500;letter-spacing:.02em}
+.hx.played path{fill:var(--plate);fill-opacity:1;stroke:#4a5a92}
+.hx.played text{fill:var(--ink)}
+.hx.played .sub{fill:var(--dim)}
+.hx.won path{fill:var(--gold-wash);fill-opacity:1;stroke:var(--gold);stroke-width:2}
+.hx.won text{fill:var(--gold)}
+.hx.won .sub{fill:var(--ink)}
+.hx.home path{stroke-width:2;fill-opacity:.3}
+.hx.home text{fill:var(--ink);font-weight:700;font-size:14.5px}
+.hx.home .sub{fill:var(--dim);font-weight:500;font-size:11px}
+.hx.open path{fill:none;stroke-dasharray:none;stroke:var(--line)}
+.hx.open text{fill:var(--faint);font-weight:500}
+.hx.rex path{fill:var(--gold);fill-opacity:1;stroke:var(--gold)}
+.hx.rex text{fill:var(--gold-ink);font-weight:700;font-size:15.5px}
+.hx.rex .sub{font:400 8.5px var(--display);letter-spacing:.04em}
+a.hx:hover path,a.hx:focus-visible path{fill:var(--line);fill-opacity:1;stroke:var(--ink)}
+a.hx.rex:hover path,a.hx.rex:focus-visible path{fill:#f2d486;stroke:#f2d486}
+a.hx.home:hover path,a.hx.home:focus-visible path{fill-opacity:.5}
+a.hx:focus-visible{outline:none}
+.hx.hl path{stroke:var(--hl);stroke-width:3.2}
+.galaxy.intro .hx{animation:hxIn .5s ease-out both;animation-delay:calc(var(--ring)*110ms)}
+@keyframes hxIn{from{opacity:.2}to{opacity:1}}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;font:500 .9rem/1.3 var(--cond);letter-spacing:.03em;color:var(--dim);margin-top:10px;justify-content:center}
+.key i{display:inline-block;width:14px;height:12px;margin-right:6px;vertical-align:-1px;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+
+/* ledgers */
+.scroll{overflow-x:auto;border:1px solid var(--line);background:var(--hull)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th{font:600 .86rem/1.2 var(--cond);letter-spacing:.09em;text-transform:uppercase;color:var(--dim);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--plate)}
+td{padding:9px 12px;border-bottom:1px solid #222c52;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+td.nw{white-space:nowrap}
+tbody tr:hover td{background:#17204299}
+.who{display:inline-flex;align-items:center;gap:8px;color:var(--ink);font-weight:500;white-space:nowrap}
+.who i{width:11px;height:10px;flex:none;background:var(--c);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.pill{display:inline-block;font:600 .84rem/1 var(--cond);letter-spacing:.07em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.pill.win{color:var(--gold-ink);background:var(--gold);border-color:var(--gold)}
+.pill.set{color:var(--dim)}
+.chips{display:flex;flex-wrap:wrap;gap:4px 12px}
+.campaign th:first-child,.campaign td:first-child{position:sticky;left:0;z-index:1;background:var(--plate)}
+.campaign td{min-width:104px;font:500 1rem/1.2 var(--cond);letter-spacing:.02em}
+.campaign td a{color:var(--dim)}
+.campaign td.w{background:var(--gold-wash)}
+.campaign td.w a{color:var(--gold);font-weight:700}
+.campaign td.out{color:var(--faint);text-align:center}
+.matrix td,.matrix th{text-align:center}
+.matrix th:first-child,.matrix td:first-child{text-align:left}
+.matrix td.self{color:var(--faint)}
+.matrix td.hot{background:var(--gold-wash);color:var(--gold);font-weight:600}
+
+/* fair-share bars */
+.bars{display:grid;gap:12px;border:1px solid var(--line);background:var(--hull);padding:16px}
+.barrow{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:10px;align-items:center}
+.track{position:relative;height:18px;background:linear-gradient(var(--line),var(--line)) left center/100% 1px no-repeat}
+.track .fill{position:absolute;left:0;top:3px;height:12px;background:var(--c);border-radius:0 4px 4px 0;min-width:0}
+.track .fair{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);margin-left:-1px}
+.barrow .val{font-size:.93rem;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dispatch{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.dispatch li{display:grid;grid-template-columns:12px minmax(0,1fr);gap:10px;align-items:baseline;max-width:62ch}
+.dispatch li::before{content:"";width:10px;height:9px;background:var(--gold);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+
+/* detail headers + cards */
+.head{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.head h1{font:400 clamp(1.5rem,4vw,2.3rem)/1.15 var(--display)}
+.head>div{display:grid;gap:6px;min-width:0}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:0}
+.facts div{background:var(--hull);padding:10px 14px;min-width:0}
+.facts dt{font:500 .9rem/1.2 var(--cond);letter-spacing:.05em;color:var(--dim)}
+.facts dd{margin:2px 0 0;font-weight:500;overflow-wrap:anywhere}
+.swatch{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--s);box-shadow:0 0 0 1px var(--faint);margin-right:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.card{display:grid;gap:8px;border:1px solid var(--line);border-top:3px solid var(--c);background:var(--hull);padding:14px;color:var(--ink);align-content:start}
+.card:hover{background:var(--plate);text-decoration:none}
+.card h3{font:600 1.15rem/1.2 var(--ui)}
+.card .big{font:600 1.5rem/1.1 var(--ui)}
+.card .big small{font:500 .92rem var(--ui);color:var(--dim)}
+.card p{font-size:.92rem;color:var(--dim)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button{font:600 .9rem/1 var(--cond);letter-spacing:.06em;padding:8px 12px;background:transparent;color:var(--dim);border:1px solid var(--line);cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+
+/* form */
+form{display:grid;gap:32px;max-width:940px}
+.block{display:grid;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.span2{grid-column:span 2}
+.fld{display:grid;gap:4px;min-width:0}
+.fld label,legend{font:600 .9rem/1.2 var(--cond);letter-spacing:.05em;color:var(--dim);padding:0}
+input,select,textarea{width:100%;min-width:0;font:400 1rem/1.3 var(--ui);color:var(--ink);background:var(--void);border:1px solid var(--line);padding:9px 10px;border-radius:0}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+textarea{min-height:110px;resize:vertical}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.tri div{display:flex;margin-top:4px}
+.tri label{flex:1;text-align:center;cursor:pointer}
+.tri input{position:absolute;opacity:0;width:1px;height:1px}
+.tri span{display:block;padding:9px 6px;border:1px solid var(--line);margin-left:-1px;font:600 .95rem/1 var(--cond);letter-spacing:.05em;color:var(--dim)}
+.tri label:first-child span{margin-left:0}
+.tri input:checked+span{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.tri input:focus-visible+span{outline:2px solid var(--gold);outline-offset:1px}
+.seat{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.7fr) 74px 70px minmax(0,.9fr) 58px 36px;gap:8px;align-items:end;padding-bottom:10px;border-bottom:1px solid #222c52}
+.seat .won{display:grid;gap:4px;justify-items:center}
+.seat .won input{width:20px;height:20px;accent-color:var(--gold);margin:8px 0}
+.seat .x{height:40px;width:36px;background:transparent;border:1px solid var(--line);color:var(--dim);cursor:pointer;font-size:1.1rem}
+.seat .x:hover{color:var(--danger);border-color:var(--danger)}
+.nowin{display:flex;gap:8px;align-items:center;font-size:.95rem;color:var(--dim)}
+.nowin input{width:18px;height:18px;accent-color:var(--gold)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.error{color:var(--danger);font-weight:500;min-height:1.4em}
+.empty{border:1px solid var(--line);background:var(--hull);padding:24px;display:grid;gap:10px;justify-items:start}
+
+#tip{position:fixed;z-index:20;max-width:260px;padding:8px 10px;background:var(--plate);border:1px solid var(--gold);color:var(--ink);font-size:.9rem;line-height:1.35;white-space:pre-line;pointer-events:none}
+#toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:21;background:var(--gold);color:var(--gold-ink);font-weight:600;padding:10px 16px;max-width:calc(100% - 32px)}
+footer{border-top:1px solid var(--line);margin-top:16px}
+footer .wrap{padding-block:16px;color:var(--faint);font-size:.88rem;display:flex;flex-wrap:wrap;gap:4px 18px;justify-content:space-between}
+
+@media (max-width:980px){
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .two,.two.even{grid-template-columns:minmax(0,1fr)}
+  .tiles.habits,.tiles.sets{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tiles.sets{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .tiles.habits{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .seat{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:8px}
+  .seat .p,.seat .f{grid-column:span 4}
+  .seat .c{grid-column:span 2}
+  .seat .won{justify-items:start}
+  nav{order:3;flex-basis:100%;overflow-x:auto;justify-content:space-between}
+  nav a{padding:8px 6px;font-size:.92rem;letter-spacing:.06em}
+  .brand{flex:1 1 auto}
+  .barrow{grid-template-columns:92px minmax(0,1fr)}
+  .barrow .val{grid-column:2}
+  .hx .sub{display:none}
+  .hx.rex .sub{display:block}
+  .hx text{font-size:15px}
+  .hx.home text{font-size:15.5px}
+}
+@media (prefers-reduced-motion:reduce){.galaxy.intro .hx{animation:none}.hx path{transition:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script id="ledger" type="application/json">
+{
+  "schema": 1,
+  "games": [
+    {
+      "n": 1,
+      "date": "2024-12-29",
+      "where": null,
+      "vpLimit": 10,
+      "pok": false,
+      "codex": false,
+      "te": false,
+      "map": null,
+      "pick": null,
+      "rounds": null,
+      "hours": null,
+      "end": null,
+      "custodians": null,
+      "mecatol": null,
+      "villain": null,
+      "notes": "",
+      "seats": [
+        {
+          "p": "Chris",
+          "f": "Universities of Jol-Nar",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Christian",
+          "f": "Emirates of Hacan",
+          "win": true,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Erin",
+          "f": "Federation of Sol",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Nick",
+          "f": "Xxcha Kingdom",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "date": "2025-01-30",
+      "where": null,
+      "vpLimit": 10,
+      "pok": false,
+      "codex": false,
+      "te": false,
+      "map": null,
+      "pick": null,
+      "rounds": null,
+      "hours": null,
+      "end": null,
+      "custodians": null,
+      "mecatol": null,
+      "villain": null,
+      "notes": "",
+      "seats": [
+        {
+          "p": "Chris",
+          "f": "Yssaril Tribes",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Christian",
+          "f": "Yin Brotherhood",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Erin",
+          "f": "Sardakk N'orr",
+          "win": true,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Nick",
+          "f": "Nekro Virus",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "date": "2025-12-29",
+      "where": null,
+      "vpLimit": 10,
+      "pok": false,
+      "codex": false,
+      "te": false,
+      "map": null,
+      "pick": null,
+      "rounds": null,
+      "hours": null,
+      "end": null,
+      "custodians": null,
+      "mecatol": null,
+      "villain": null,
+      "notes": "",
+      "seats": [
+        {
+          "p": "Chris",
+          "f": "Clan of Saar",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Christian",
+          "f": "Nekro Virus",
+          "win": true,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Erin",
+          "f": "Yssaril Tribes",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Nick",
+          "f": "Ghosts of Creuss",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Jared",
+          "f": "Barony of Letnev",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "date": "2026-01-30",
+      "where": null,
+      "vpLimit": 10,
+      "pok": false,
+      "codex": false,
+      "te": false,
+      "map": null,
+      "pick": null,
+      "rounds": null,
+      "hours": null,
+      "end": null,
+      "custodians": null,
+      "mecatol": null,
+      "villain": null,
+      "notes": "",
+      "seats": [
+        {
+          "p": "Chris",
+          "f": "Naalu Collective",
+          "win": true,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Christian",
+          "f": "Ghosts of Creuss",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Erin",
+          "f": "L1Z1X Mindnet",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Nick",
+          "f": "Embers of Muaat",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Jared",
+          "f": "Arborec",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "date": "2026-02-28",
+      "where": null,
+      "vpLimit": 10,
+      "pok": true,
+      "codex": false,
+      "te": false,
+      "map": null,
+      "pick": null,
+      "rounds": null,
+      "hours": null,
+      "end": null,
+      "custodians": null,
+      "mecatol": null,
+      "villain": null,
+      "notes": "",
+      "seats": [
+        {
+          "p": "Chris",
+          "f": "Titans of Ul",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Christian",
+          "f": "Vuil'raith Cabal",
+          "win": true,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Erin",
+          "f": "Mahact Gene-Sorcerers",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Nick",
+          "f": "Empyrean",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        },
+        {
+          "p": "Jared",
+          "f": "Naaz-Rokha Alliance",
+          "win": false,
+          "vp": null,
+          "seat": null,
+          "color": null
+        }
+      ]
+    }
+  ]
+}
+</script>
+<script id="engine">
+(function(){
+'use strict';
+
+/* ---------- reference data ---------- */
+const SETS={Base:'Base game',PoK:'Prophecy of Kings',Codex:'Codex',TE:"Thunder's Edge",Homebrew:'Homebrew'};
+const FACTIONS=[
+ ['Arborec','Arborec','Base'],['Barony of Letnev','Letnev','Base'],['Clan of Saar','Saar','Base'],['Embers of Muaat','Muaat','Base'],
+ ['Emirates of Hacan','Hacan','Base'],['Federation of Sol','Sol','Base'],['Ghosts of Creuss','Creuss','Base'],['L1Z1X Mindnet','L1Z1X','Base'],
+ ['Mentak Coalition','Mentak','Base'],['Naalu Collective','Naalu','Base'],['Nekro Virus','Nekro','Base'],["Sardakk N'orr","Sardakk",'Base'],
+ ['Universities of Jol-Nar','Jol-Nar','Base'],['Winnu','Winnu','Base'],['Xxcha Kingdom','Xxcha','Base'],['Yin Brotherhood','Yin','Base'],['Yssaril Tribes','Yssaril','Base'],
+ ['Argent Flight','Argent','PoK'],['Empyrean','Empyrean','PoK'],['Mahact Gene-Sorcerers','Mahact','PoK'],['Naaz-Rokha Alliance','Naaz-Rokha','PoK'],
+ ['Nomad','Nomad','PoK'],['Titans of Ul','Titans','PoK'],["Vuil'raith Cabal",'Cabal','PoK'],
+ ['Council Keleres','Keleres','Codex'],
+ ['Crimson Rebellion','Crimson','TE'],['Deepwrought Scholarate','Deepwrought','TE'],['Firmament / Obsidian','Firmament','TE'],['Last Bastion','Bastion','TE'],['Ral Nel Consortium','Ral Nel','TE']
+].map(([name,short,set])=>({name,short,set}));
+const COLORS=['Black','Blue','Green','Orange','Pink','Purple','Red','Yellow'];
+const MAPS=['Constructed','Custom','Milty draft'];
+const PICKS=['Chosen','Random','Draft'];
+const ENDS=['Reached the VP limit','Time called','Concession','Unfinished'];
+const GAME_FIELDS=['date','where','vpLimit','pok','codex','te','map','pick','rounds','hours','end','custodians','mecatol','villain'];
+const SEAT_FIELDS=['vp','seat','color'];
+const MAX_SEATS=8;
+
+/* ---------- helpers ---------- */
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const known=v=>v!==null&&v!==undefined&&v!=='';
+const NA='<span class="na">n/a</span>';
+const show=(v,fmt)=>known(v)?esc(fmt?fmt(v):v):NA;
+const yn=v=>v===true?'Yes':v===false?'No':NA;
+const plural=(n,w,ws)=>`${n} ${n===1?w:(ws||w+'s')}`;
+const round=(v,d=1)=>Number(v.toFixed(d));
+const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const signed=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(1);
+const pct=(a,b)=>b?Math.round(a/b*100)+'%':null;
+const listing=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+const fmtDate=d=>{const[y,m,day]=d.split('-').map(Number);return new Date(y,m-1,day).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})};
+const mode=a=>{const c=new Map();a.forEach(v=>c.set(v,(c.get(v)||0)+1));return[...c].sort((x,y)=>y[1]-x[1])[0]};
+
+/* ---------- analysis (pure) ---------- */
+function analyse(L){
+  const games=[...L.games].sort((a,b)=>a.n-b.n);
+  const P=new Map(),F=new Map();
+  FACTIONS.forEach(f=>F.set(f.name,{...f,plays:0,wins:0,rows:[]}));
+  let filled=0,fields=0;
+  games.forEach(g=>{
+    const w=g.seats.find(s=>s.win)||null;
+    GAME_FIELDS.forEach(k=>{fields++;if(known(g[k]))filled++});
+    g.seats.forEach(s=>{
+      SEAT_FIELDS.forEach(k=>{fields++;if(known(s[k]))filled++});
+      if(!P.has(s.p))P.set(s.p,{name:s.p,idx:P.size,rows:[],wins:0,decided:0,fair:0,vps:[]});
+      const p=P.get(s.p);
+      p.rows.push({g,s});
+      if(w){p.decided++;p.fair+=1/g.seats.length}
+      if(s.win){p.wins++;p.lastWin=g.n}
+      if(known(s.vp))p.vps.push(s.vp);
+      if(s.f){
+        if(!F.has(s.f))F.set(s.f,{name:s.f,short:s.f,set:'Homebrew',plays:0,wins:0,rows:[]});
+        const f=F.get(s.f);f.plays++;if(s.win)f.wins++;f.rows.push({g,s});
+      }
+    });
+  });
+  const players=[...P.values()];
+  const ranked=[...players].sort((a,b)=>b.wins-a.wins||(b.wins/(b.decided||1))-(a.wins/(a.decided||1))||a.name.localeCompare(b.name));
+  ranked.forEach((p,i)=>{const q=ranked[i-1];p.rank=(q&&q.wins===p.wins&&q.wins/(q.decided||1)===p.wins/(p.decided||1))?q.rank:i+1});
+  const winners=games.map(g=>({g,w:g.seats.find(s=>s.win)||null})).filter(x=>x.w);
+  let changes=0;winners.forEach((x,i)=>{if(!i||winners[i-1].w.p!==x.w.p)changes++});
+  const factions=[...F.values()];
+  const canon=factions.filter(f=>f.set!=='Homebrew');
+  return{games,players,ranked,factions,canon,winners,changes,filled,fields,
+    emperor:winners[winners.length-1]||null,
+    fielded:canon.filter(f=>f.plays).length,
+    crowned:players.filter(p=>p.wins).length};
+}
+function dispatches(A){
+  const out=[],{games,players,factions,winners}=A;
+  if(!games.length)return out;
+  const win=players.filter(p=>p.wins).map(p=>p.name),none=players.filter(p=>!p.wins);
+  out.push(`${win.length} of ${players.length} players have won a game.`+(none.length?` Still chasing a first win: ${listing(none.map(p=>`${p.name} (${plural(p.rows.length,'game')})`))}.`:''));
+  if(winners.length>1){
+    let best=1,run=1,who=winners[0].w.p;
+    for(let i=1;i<winners.length;i++){run=winners[i].w.p===winners[i-1].w.p?run+1:1;if(run>best){best=run;who=winners[i].w.p}}
+    out.push(best>1?`${who} holds the longest win streak at ${best} games.`:'Nobody has won two games in a row.');
+  }
+  const multi=factions.filter(f=>f.wins>1);
+  if(winners.length>1)out.push(multi.length?`${listing(multi.map(f=>f.name))} ${multi.length>1?'have':'has'} won more than once.`:`No faction has won twice. Each of the ${winners.length} wins came from a different faction.`);
+  const rep=factions.filter(f=>f.plays>1).sort((a,b)=>b.plays-a.plays||b.wins-a.wins);
+  if(rep.length)out.push('Repeat picks: '+listing(rep.map(f=>`${f.name} (${plural(f.wins,'win')} in ${f.plays})`))+'.');
+  const played=factions.filter(f=>f.plays),left=factions.filter(f=>f.set==='Base'&&!f.plays);
+  if(played.length&&played.every(f=>f.set==='Base'))out.push(`Every faction fielded so far comes from the base game.`+(left.length?` Unplayed base factions: ${listing(left.map(f=>f.name))}.`:''));
+  return out;
+}
+function habits(A){
+  const G=A.games,N=G.length;
+  const tile=(label,recs,value)=>({label,value:recs.length?value(recs):null,sub:`${recs.length} of ${plural(N,'game')} recorded`});
+  const flag=(label,k)=>tile(label,G.filter(g=>known(g[k])),r=>`${r.filter(g=>g[k]).length} of ${r.length}`);
+  const top=(label,k,f)=>tile(label,G.filter(g=>known(g[k])),r=>{const m=mode(r.map(g=>g[k]));return f?f(m[0]):m[0]});
+  const held=(label,k)=>tile(label,G.filter(g=>known(g[k])&&g.seats.some(s=>s.win)),r=>`${r.filter(g=>g.seats.find(s=>s.win).p===g[k]).length} of ${r.length}`);
+  const margin=G.filter(g=>{const w=g.seats.find(s=>s.win);return w&&known(w.vp)&&g.seats.some(s=>!s.win&&known(s.vp))});
+  const speaker=G.filter(g=>g.seats.some(s=>s.seat===1)&&g.seats.some(s=>s.win));
+  return[
+    flag('Prophecy of Kings used','pok'),flag('Codex used','codex'),flag("Thunder's Edge used",'te'),
+    top('Usual VP limit','vpLimit',v=>v+' VP'),top('Usual map','map'),top('Usual faction selection','pick'),
+    tile('Average rounds',G.filter(g=>known(g.rounds)),r=>String(round(avg(r.map(g=>g.rounds))))),
+    tile('Average length',G.filter(g=>known(g.hours)),r=>round(avg(r.map(g=>g.hours)))+' hours'),
+    tile('Average winning margin',margin,r=>round(avg(r.map(g=>{const w=g.seats.find(s=>s.win);return w.vp-Math.max(...g.seats.filter(s=>!s.win&&known(s.vp)).map(s=>s.vp))})))+' VP'),
+    held('Custodians taker won','custodians'),held('Mecatol holder won','mecatol'),
+    tile('Starting speaker won',speaker,r=>`${r.filter(g=>g.seats.find(s=>s.seat===1).win).length} of ${r.length}`)
+  ];
+}
+
+/* ---------- state ---------- */
+const ledgerEl=document.getElementById('ledger');
+let L=JSON.parse(ledgerEl.textContent);
+let A=analyse(L);
+let writer=false,cap=null,setFilter='All',introPlayed=false;
+const pcolor=p=>{const i=typeof p==='string'?A.players.find(x=>x.name===p)?.idx:p.idx;return i>=0&&i<8?`var(--p${i+1})`:'var(--dim)'};
+const who=(name,link=true)=>{const inner=`<i style="--c:${pcolor(name)}"></i>${esc(name)}`;return link?`<a class="who" href="#player-${slug(name)}">${inner}</a>`:`<span class="who">${inner}</span>`};
+const fref=(name,label)=>name?`<a href="#faction-${slug(name)}">${esc(label||name)}</a>`:NA;
+const fshort=name=>A.factions.find(f=>f.name===name)?.short||name;
+
+/* ---------- views ---------- */
+function galaxy(){
+  const s=50,R=Math.sqrt(3),dirs=[[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]];
+  const ring=r=>{const out=[];let q=dirs[4][0]*r,t=dirs[4][1]*r;for(let i=0;i<6;i++)for(let j=0;j<r;j++){out.push([q,t,j===0]);q+=dirs[i][0];t+=dirs[i][1]}return out};
+  const xy=(q,t)=>[s*1.5*q,s*R*(t+q/2)];
+  const shape=(()=>{const k=s*.955,p=[];for(let i=0;i<6;i++){const a=Math.PI/3*i;p.push(`${round(k*Math.cos(a),2)} ${round(k*Math.sin(a),2)}`)}return'M'+p.join('L')+'Z'})();
+  const r1=ring(1),r2=ring(2),r3=ring(3),homes=r3.filter(c=>c[2]),outer=r3.filter(c=>!c[2]);
+  const slots=[...r1.map(c=>[...c,1]),...r2.map(c=>[...c,2]),...outer.map(c=>[...c,3])];
+  const order=[...A.canon].map((f,i)=>({f,i})).sort((a,b)=>b.f.wins-a.f.wins||b.f.plays-a.f.plays||a.i-b.i).map(x=>x.f);
+  const lines=(l1,l2)=>l2?`<text y="-3">${esc(l1)}</text><text class="sub" y="13">${esc(l2)}</text>`:`<text y="5">${esc(l1)}</text>`;
+  let cells='';
+  slots.forEach((c,i)=>{
+    const f=order[i],[x,y]=xy(c[0],c[1]);
+    const cls=f.wins?'won':f.plays?'played':'';
+    const by=[...new Set(f.rows.map(r=>slug(r.s.p)))].join(' ');
+    const tip=`${f.name}\n${SETS[f.set]}\n`+(f.plays?`${plural(f.plays,'game')}, ${plural(f.wins,'win')}`:'Never played');
+    cells+=`<a class="hx ${cls}" href="#faction-${slug(f.name)}" data-by="${by}" data-tip="${esc(tip)}" aria-label="${esc(tip.replace(/\n/g,', '))}" transform="translate(${round(x,1)} ${round(y,1)})" style="--ring:${c[3]}"><path d="${shape}"/>${lines(f.short,f.wins?`${f.wins} of ${f.plays} won`:f.plays?`${f.plays} played`:'')}</a>`;
+  });
+  const seats=[...A.players].sort((a,b)=>b.rows.length-a.rows.length||a.idx-b.idx).slice(0,6).sort((a,b)=>a.idx-b.idx);
+  homes.forEach((c,i)=>{
+    const p=seats[i],[x,y]=xy(c[0],c[1]);
+    if(p){
+      const tip=`${p.name}\n${plural(p.rows.length,'game')}, ${plural(p.wins,'win')}`;
+      cells+=`<a class="hx home" data-player="${slug(p.name)}" data-c="${pcolor(p)}" href="#player-${slug(p.name)}" data-tip="${esc(tip)}" aria-label="${esc(tip.replace('\n',', '))}" transform="translate(${round(x,1)} ${round(y,1)})" style="--ring:3"><path d="${shape}" style="fill:${pcolor(p)};stroke:${pcolor(p)}"/>${lines(p.name,plural(p.wins,'win'))}</a>`;
+    }else cells+=`<g class="hx open" transform="translate(${round(x,1)} ${round(y,1)})" style="--ring:3"><path d="${shape}"/>${lines('Open seat')}</g>`;
+  });
+  const e=A.emperor;
+  cells+=`<a class="hx rex" href="${e?'#game-'+e.g.n:'#games'}" data-tip="${esc(e?`Mecatol Rex\nHeld by ${e.w.p} since game ${e.g.n}`:'Mecatol Rex\nThe throne is empty')}" aria-label="Mecatol Rex" style="--ring:0"><path d="${shape}"/><text class="sub" y="-20" textLength="52" lengthAdjust="spacingAndGlyphs">MECATOL</text><text class="sub" y="-9" textLength="24" lengthAdjust="spacingAndGlyphs">REX</text><text y="13">${esc(e?e.w.p:'Empty')}</text></a>`;
+  const w=s*2+s*1.5*6,h=s*R*7;
+  return`<svg class="galaxy${introPlayed?'':' intro'}" viewBox="${-w/2} ${-h/2} ${w} ${h}" role="group" aria-label="Galaxy map of all 30 factions, with the most successful nearest Mecatol Rex">${cells}</svg>
+  <div class="key"><span><i style="background:var(--gold)"></i>Has won</span><span><i style="background:#5a6ba6"></i>Played</span><span><i style="background:var(--line)"></i>Never played</span><span>Closer to Mecatol Rex means more wins</span></div>`;
+}
+function standings(){
+  return`<div class="scroll"><table><thead><tr><th class="num">#</th><th>Player</th><th class="num">Games</th><th class="num">Wins</th><th class="num">Win rate</th><th class="num">Fair share</th><th class="num">Vs fair</th><th class="num">Avg VP</th></tr></thead><tbody>${A.ranked.map(p=>`<tr><td class="num">${p.rank}</td><td>${who(p.name)}</td><td class="num">${p.rows.length}</td><td class="num">${p.wins}</td><td class="num">${pct(p.wins,p.decided)??NA}</td><td class="num">${p.fair.toFixed(1)}</td><td class="num">${signed(p.wins-p.fair)}</td><td class="num">${p.vps.length?round(avg(p.vps)):NA}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function campaign(){
+  return`<div class="scroll"><table class="campaign"><thead><tr><th>Player</th>${A.games.map(g=>`<th><a href="#game-${g.n}">Game ${g.n}</a></th>`).join('')}</tr></thead><tbody>${A.players.map(p=>`<tr><td>${who(p.name)}</td>${A.games.map(g=>{const s=g.seats.find(x=>x.p===p.name);if(!s)return'<td class="out" title="Did not play">·</td>';const label=s.f?esc(fshort(s.f)):'n/a';return`<td class="${s.win?'w':''}"><a href="#game-${g.n}" title="${esc(s.f||'Faction not recorded')}">${label}</a></td>`}).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function fairBars(){
+  const rows=[...A.ranked];
+  const max=Math.max(1,...rows.map(p=>Math.max(p.wins,p.fair)));
+  return`<div class="bars">${rows.map(p=>`<div class="barrow" data-tip="${esc(`${p.name}\n${plural(p.wins,'win')} against a fair share of ${p.fair.toFixed(1)}`)}"><span>${who(p.name,false)}</span><div class="track" aria-hidden="true"><div class="fill" style="width:${p.wins/max*100}%;--c:${pcolor(p)}"></div><div class="fair" style="left:${p.fair/max*100}%"></div></div><span class="val">${p.wins} / ${p.fair.toFixed(1)}</span></div>`).join('')}</div>`;
+}
+function matrix(){
+  const ps=A.players;
+  const body=ps.map(a=>`<tr><td>${who(a.name)}</td>${ps.map(b=>{
+    if(a===b)return'<td class="self">—</td>';
+    const shared=a.rows.filter(r=>r.g.seats.some(s=>s.p===b.name));
+    const won=shared.filter(r=>r.s.win).length;
+    return`<td class="${won?'hot':''}">${won} / ${shared.length}</td>`}).join('')}</tr>`).join('');
+  return`<div class="scroll"><table class="matrix"><thead><tr><th>Winner</th>${ps.map(p=>`<th>${esc(p.name)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+function habitsTiles(){
+  return`<div class="tiles habits">${habits(A).map(t=>`<div class="tile"><span>${esc(t.label)}</span><b class="${t.value===null?'na-v':''}">${t.value===null?'n/a':esc(t.value)}</b><em>${esc(t.sub)}</em></div>`).join('')}</div>`;
+}
+function vOverview(){
+  if(!A.games.length)return`<div class="empty"><h1 class="sec">No games on file</h1><p class="note">Log your first game and the galaxy will start to fill in.</p>${writer?'<a class="btn gold" href="#log">Log a game</a>':''}</div>`;
+  const e=A.emperor;
+  const pctFilled=A.fields?Math.round(A.filled/A.fields*100):0;
+  return`<section class="hero">
+    <div class="throne">
+      <div class="eyebrow">Reigning Emperor</div>
+      <h1>${esc(e?e.w.p:'Vacant')}</h1>
+      ${e?`<p class="held">${e.w.f?fref(e.w.f):'Faction not recorded'} &middot; <a href="#game-${e.g.n}">Game ${e.g.n}</a></p>`:''}
+      ${A.winners.length?`<p class="flavor">The throne has changed hands ${plural(A.changes,'time')} in ${plural(A.winners.length,'game')}.</p>`:''}
+      <div class="tiles">
+        <div class="tile"><b>${A.games.length}</b><span>Games played</span></div>
+        <div class="tile"><b>${A.crowned} <small>of ${A.players.length}</small></b><span>Players with a win</span></div>
+        <div class="tile"><b>${A.fielded} <small>of ${A.canon.length}</small></b><span>Factions fielded</span></div>
+        <div class="tile"><b>${pctFilled}%</b><span>Game details filled in</span></div>
+      </div>
+    </div>
+    <div>${galaxy()}</div>
+  </section>
+  <section class="two">
+    <div><div class="sec-head"><h2 class="sec">Standings</h2></div>${standings()}</div>
+    <div><div class="sec-head"><h2 class="sec">Dispatches</h2></div><ul class="dispatch">${dispatches(A).map(d=>`<li>${esc(d)}</li>`).join('')}</ul></div>
+  </section>
+  <section><div class="sec-head"><h2 class="sec">Campaign record</h2><p class="note">Who played what in each game. Gold marks the winner, and a dot means that player sat the game out.</p></div>${campaign()}</section>
+  <section class="two even">
+    <div><div class="sec-head"><h2 class="sec">Wins against fair share</h2><p class="note">The bar is wins and the white line is fair share: 1 &divide; table size, added up across a player's games. A 5-player game adds 0.2.</p></div>${fairBars()}</div>
+    <div><div class="sec-head"><h2 class="sec">Who wins against whom</h2><p class="note">Each cell reads: wins by the row's player / games shared with the column's player.</p></div>${matrix()}</div>
+  </section>
+  <section><div class="sec-head"><h2 class="sec">Table habits</h2><p class="note">These fill in as you add details. Games marked n/a are left out of each figure.</p></div>${habitsTiles()}</section>`;
+}
+function vGames(){
+  const rows=[...A.games].reverse().map(g=>{
+    const w=g.seats.find(s=>s.win);
+    const done=GAME_FIELDS.filter(k=>known(g[k])).length+g.seats.reduce((n,s)=>n+SEAT_FIELDS.filter(k=>known(s[k])).length,0);
+    const total=GAME_FIELDS.length+g.seats.length*SEAT_FIELDS.length;
+    return`<tr><td class="nw"><a href="#game-${g.n}">Game ${g.n}</a></td><td class="nw">${known(g.date)?esc(fmtDate(g.date)):NA}</td><td>${w?who(w.p):NA}</td><td class="nw">${w?fref(w.f):NA}</td><td class="num">${g.seats.length}</td><td class="num">${show(g.vpLimit)}</td><td class="num">${yn(g.pok)}</td><td class="nw">${show(g.map)}</td><td class="num">${show(g.rounds)}</td><td class="num">${show(g.hours)}</td><td class="num">${done} / ${total}</td></tr>`}).join('');
+  return`<section><div class="head"><div><div class="eyebrow">The record</div><h1>All games</h1></div>${writer?'<a class="btn gold" href="#log">Log a game</a>':''}</div></section>
+  <section><div class="scroll"><table><thead><tr><th>Game</th><th>Date</th><th>Emperor</th><th>Faction</th><th class="num">Players</th><th class="num">VP limit</th><th class="num">PoK</th><th>Map</th><th class="num">Rounds</th><th class="num">Hours</th><th class="num">Details</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+}
+function vGame(n){
+  const g=A.games.find(x=>x.n===n);
+  if(!g)return notFound(`There is no game ${esc(n)} on file.`);
+  const w=g.seats.find(s=>s.win);
+  const seats=[...g.seats].sort((a,b)=>(b.win-a.win)||((b.vp??-1)-(a.vp??-1)));
+  const swatch=c=>known(c)?`<span class="swatch" style="--s:var(--c-${c.toLowerCase()})"></span>${esc(c)}`:NA;
+  const f=(k,v)=>`<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`;
+  return`<section class="head"><div><div class="eyebrow">${known(g.date)?esc(fmtDate(g.date)):'Date n/a'}</div><h1>Game ${g.n}</h1><p class="flavor">${w?`${esc(w.p)} took the throne${w.f?' as the '+esc(w.f):''}.`:'No winner on file.'}</p></div>${writer?`<a class="btn" href="#edit-${g.n}">Fill in details</a>`:''}</section>
+  <section><div class="sec-head"><h2 class="sec">The table</h2></div><div class="scroll"><table><thead><tr><th>Player</th><th>Faction</th><th>Result</th><th class="num">Final VP</th><th class="num">Seat</th><th>Colour</th></tr></thead><tbody>${seats.map(s=>`<tr><td>${who(s.p)}</td><td class="nw">${fref(s.f)}</td><td>${s.win?'<span class="pill win">Emperor</span>':w?'<span class="pill">Defeated</span>':NA}</td><td class="num">${show(s.vp)}</td><td class="num">${show(s.seat)}</td><td class="nw">${swatch(s.color)}</td></tr>`).join('')}</tbody></table></div></section>
+  <section><div class="sec-head"><h2 class="sec">Game setup and finish</h2></div><dl class="facts">
+    ${f('Where',show(g.where))}${f('VP limit',show(g.vpLimit))}${f('Prophecy of Kings',yn(g.pok))}${f('Codex',yn(g.codex))}${f("Thunder's Edge",yn(g.te))}${f('Map',show(g.map))}${f('Faction selection',show(g.pick))}${f('Rounds',show(g.rounds))}${f('Length',show(g.hours,v=>plural(v,'hour')))}${f('How it ended',show(g.end))}${f('Took the Custodians token',known(g.custodians)?who(g.custodians):NA)}${f('Held Mecatol at the end',known(g.mecatol)?who(g.mecatol):NA)}${f('Table villain',known(g.villain)?who(g.villain):NA)}
+  </dl></section>
+  ${g.notes?`<section><div class="sec-head"><h2 class="sec">Notes</h2></div><p class="flavor" style="white-space:pre-line">${esc(g.notes)}</p></section>`:''}`;
+}
+function vPlayers(){
+  const cards=A.ranked.map(p=>{
+    const last=p.rows[p.rows.length-1];
+    return`<a class="card" href="#player-${slug(p.name)}" style="--c:${pcolor(p)}"><h3>${esc(p.name)}</h3><div class="big">${p.wins} <small>${p.wins===1?'win':'wins'} in ${plural(p.rows.length,'game')}</small></div><p>${p.lastWin?`Last won game ${p.lastWin}`:'No wins yet'}</p><p>Last faction: ${esc(last.s.f||'n/a')}</p></a>`}).join('');
+  return`<section><div class="head"><div><div class="eyebrow">The table</div><h1>Players</h1></div></div></section>
+  <section><div class="cards">${cards}</div></section>
+  <section><div class="sec-head"><h2 class="sec">Who wins against whom</h2><p class="note">Each cell reads: wins by the row's player / games shared with the column's player.</p></div>${matrix()}</section>`;
+}
+function vPlayer(id){
+  const p=A.players.find(x=>slug(x.name)===id);
+  if(!p)return notFound('That player is not on file.');
+  const seen=new Map();p.rows.forEach(r=>{if(r.s.f)seen.set(r.s.f,(seen.get(r.s.f)||0)+1)});
+  const rivals=A.players.filter(q=>q!==p).map(q=>{
+    const shared=p.rows.filter(r=>r.g.seats.some(s=>s.p===q.name));
+    return{q,shared:shared.length,mine:shared.filter(r=>r.s.win).length,theirs:shared.filter(r=>r.g.seats.find(s=>s.p===q.name).win).length}}).filter(r=>r.shared);
+  return`<section class="head"><div><div class="eyebrow">Rank ${p.rank} of ${A.players.length}</div><h1>${esc(p.name)}</h1></div></section>
+  <section><div class="tiles habits">
+    <div class="tile"><b>${p.wins} <small>of ${p.rows.length}</small></b><span>Wins</span></div>
+    <div class="tile"><b>${pct(p.wins,p.decided)??'n/a'}</b><span>Win rate</span></div>
+    <div class="tile"><b>${signed(p.wins-p.fair)}</b><span>Against fair share of ${p.fair.toFixed(1)}</span></div>
+    <div class="tile"><b class="${p.vps.length?'':'na-v'}">${p.vps.length?round(avg(p.vps)):'n/a'}</b><span>Average final VP</span></div>
+  </div></section>
+  <section class="two even">
+    <div><div class="sec-head"><h2 class="sec">Game history</h2></div><div class="scroll"><table><thead><tr><th>Game</th><th>Faction</th><th>Result</th><th class="num">Final VP</th></tr></thead><tbody>${[...p.rows].reverse().map(r=>`<tr><td class="nw"><a href="#game-${r.g.n}">Game ${r.g.n}</a></td><td class="nw">${fref(r.s.f)}</td><td>${r.s.win?'<span class="pill win">Emperor</span>':r.g.seats.some(s=>s.win)?'<span class="pill">Defeated</span>':NA}</td><td class="num">${show(r.s.vp)}</td></tr>`).join('')}</tbody></table></div></div>
+    <div><div class="sec-head"><h2 class="sec">Rivals</h2></div><div class="scroll"><table><thead><tr><th>Player</th><th class="num">Shared</th><th class="num">${esc(p.name)} won</th><th class="num">They won</th></tr></thead><tbody>${rivals.map(r=>`<tr><td>${who(r.q.name)}</td><td class="num">${r.shared}</td><td class="num">${r.mine}</td><td class="num">${r.theirs}</td></tr>`).join('')}</tbody></table></div></div>
+  </section>
+  <section><p class="note">${plural(seen.size,'faction')} played of ${A.canon.length}.</p></section>`;
+}
+function vFactions(){
+  const sets=['Base','PoK','Codex','TE'].concat(A.factions.some(f=>f.set==='Homebrew')?['Homebrew']:[]);
+  const tile=k=>{const all=A.factions.filter(f=>f.set===k),on=all.filter(f=>f.plays).length;return`<div class="tile"><span>${esc(SETS[k])}</span><b>${on} <small>of ${all.length} played</small></b><div class="meter"><i style="width:${on/all.length*100}%"></i></div></div>`};
+  const rows=A.factions.filter(f=>setFilter==='All'||f.set===setFilter).sort((a,b)=>b.plays-a.plays||b.wins-a.wins||a.name.localeCompare(b.name)).map(f=>`<tr><td class="nw"><a href="#faction-${slug(f.name)}">${esc(f.name)}</a></td><td class="nw">${esc(SETS[f.set])}</td><td class="num">${f.plays}</td><td class="num">${f.wins}</td><td class="num">${pct(f.wins,f.plays)??NA}</td><td><div class="chips">${[...new Set(f.rows.map(r=>r.s.p))].map(n=>who(n)).join('')}</div></td></tr>`).join('');
+  return`<section><div class="head"><div><div class="eyebrow">${A.fielded} of ${A.canon.length} fielded</div><h1>Factions</h1></div></div></section>
+  <section><div class="tiles sets">${sets.slice(0,4).map(tile).join('')}</div></section>
+  <section><div class="tabs" role="group" aria-label="Filter by set">${['All',...sets].map(k=>`<button type="button" data-set="${k}" aria-pressed="${setFilter===k}">${esc(k==='All'?'All sets':SETS[k])}</button>`).join('')}</div>
+  <div class="scroll"><table><thead><tr><th>Faction</th><th>Set</th><th class="num">Games</th><th class="num">Wins</th><th class="num">Win rate</th><th>Played by</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+}
+function vFaction(id){
+  const f=A.factions.find(x=>slug(x.name)===id);
+  if(!f)return notFound('That faction is not on file.');
+  return`<section class="head"><div><div class="eyebrow">${esc(SETS[f.set])}</div><h1>${esc(f.name)}</h1></div></section>
+  <section><div class="tiles habits">
+    <div class="tile"><b>${f.plays}</b><span>Games</span></div>
+    <div class="tile"><b>${f.wins}</b><span>Wins</span></div>
+    <div class="tile"><b class="${f.plays?'':'na-v'}">${pct(f.wins,f.plays)??'n/a'}</b><span>Win rate</span></div>
+    <div class="tile"><b>${new Set(f.rows.map(r=>r.s.p)).size}</b><span>Different players</span></div>
+  </div></section>
+  <section>${f.rows.length?`<div class="scroll"><table><thead><tr><th>Game</th><th>Player</th><th>Result</th><th class="num">Final VP</th></tr></thead><tbody>${[...f.rows].reverse().map(r=>`<tr><td class="nw"><a href="#game-${r.g.n}">Game ${r.g.n}</a></td><td>${who(r.s.p)}</td><td>${r.s.win?'<span class="pill win">Emperor</span>':r.g.seats.some(s=>s.win)?'<span class="pill">Defeated</span>':NA}</td><td class="num">${show(r.s.vp)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="note">Nobody at this table has played this faction yet.</p>'}</section>`;
+}
+function notFound(msg){return`<div class="empty"><p>${msg}</p><a class="btn" href="#overview">Back to the galaxy</a></div>`}
+
+/* ---------- form ---------- */
+let seatSeq=0;
+const NA_OPT=`<option value="">n/a (don't know)</option>`;
+const opt=(v,cur)=>`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(v)}</option>`;
+const selectF=(id,label,opts,cur,{short=false,cls=''}={})=>`<div class="fld ${cls}"><label for="${id}">${label}</label><select id="${id}">${short?'<option value="">n/a</option>':NA_OPT}${opts.map(o=>opt(o,cur)).join('')}</select></div>`;
+const numF=(id,label,cur,attrs='')=>`<div class="fld"><label for="${id}">${label}</label><input id="${id}" type="number" inputmode="decimal" placeholder="n/a" value="${known(cur)?esc(cur):''}" ${attrs}></div>`;
+const tri=(id,label,cur)=>`<fieldset class="tri"><legend>${label}</legend><div>${[['yes',true,'Yes'],['no',false,'No'],['na',null,'n/a']].map(([k,v,t])=>`<label><input type="radio" name="${id}" id="${id}-${k}" value="${k}"${(cur??null)===v?' checked':''}><span>${t}</span></label>`).join('')}</div></fieldset>`;
+function seatRow(s){
+  const i=seatSeq++;
+  return`<div class="seat" data-seat="${i}">
+    <div class="fld p"><label for="s${i}-p">Player</label><input id="s${i}-p" list="dl-players" autocomplete="off" required value="${esc(s.p||'')}" placeholder="Name"></div>
+    <div class="fld f"><label for="s${i}-f">Faction</label><input id="s${i}-f" list="dl-factions" autocomplete="off" value="${esc(s.f||'')}" placeholder="n/a"></div>
+    ${numF(`s${i}-vp`,'Final VP',s.vp,'min="0" max="30" step="1"')}
+    ${numF(`s${i}-seat`,'Seat',s.seat,'min="1" max="8" step="1"')}
+    <div class="c">${selectF(`s${i}-c`,'Colour',COLORS,s.color||'',{short:true})}</div>
+    <div class="won"><label class="fld" for="s${i}-w" style="font:600 .9rem/1.2 var(--cond);color:var(--dim)">Won</label><input type="radio" name="winner" id="s${i}-w" value="${i}"${s.win?' checked':''} aria-label="Won the game"></div>
+    <button type="button" class="x" data-drop="${i}" aria-label="Remove this player">&times;</button>
+  </div>`;
+}
+function vForm(n){
+  if(!writer)return notFound('This page is read-only.');
+  const last=A.games[A.games.length-1];
+  const editing=n!==null;
+  const g=editing?A.games.find(x=>x.n===n):{n:(last?last.n:0)+1,seats:(last?last.seats:[{},{},{}]).map(s=>({p:s.p})),notes:''};
+  if(!g)return notFound(`There is no game ${esc(n)} on file.`);
+  const mxp=g.seats.map(s=>s.p).filter(Boolean);
+  seatSeq=0;
+  return`<section class="head"><div><div class="eyebrow">${editing?'Fill in what you know':'New entry'}</div><h1>${editing?'Edit':'Log'} game ${g.n}</h1><p class="note">Only the player names are required. Leave anything else as n/a and come back to it later.</p></div></section>
+  <section><form id="gameForm" data-n="${g.n}" data-editing="${editing}" novalidate>
+    <datalist id="dl-players">${A.players.map(p=>`<option value="${esc(p.name)}"></option>`).join('')}</datalist>
+    <datalist id="dl-factions">${FACTIONS.map(f=>`<option value="${esc(f.name)}"></option>`).join('')}</datalist>
+    <div class="block"><h2 class="sec">The table</h2><p class="note">Seat 1 is the starting speaker. Type a new name to add a player, or a homebrew faction not on the list.</p>
+      <div id="seats" class="block">${g.seats.map(seatRow).join('')}</div>
+      <div class="actions"><button type="button" class="btn" id="addSeat">Add a player</button><label class="nowin"><input type="radio" name="winner" id="noWinner" value=""${g.seats.some(s=>s.win)?'':' checked'}>No winner on file</label></div>
+    </div>
+    <div class="block"><h2 class="sec">Setup</h2><div class="grid3">
+      <div class="fld"><label for="f-date">Date played</label><input id="f-date" type="date" value="${esc(g.date||'')}"></div>
+      <div class="fld"><label for="f-where">Where</label><input id="f-where" placeholder="n/a" value="${esc(g.where||'')}"></div>
+      <div class="fld"><label for="f-vp">Victory point limit</label><input id="f-vp" type="number" inputmode="numeric" min="1" max="30" list="dl-vp" placeholder="n/a" value="${known(g.vpLimit)?esc(g.vpLimit):''}"><datalist id="dl-vp"><option value="10"></option><option value="14"></option></datalist></div>
+      ${tri('f-pok','Prophecy of Kings',g.pok)}${tri('f-codex','Codex',g.codex)}${tri('f-te',"Thunder's Edge",g.te)}
+      ${selectF('f-map','Map',MAPS,g.map||'')}${selectF('f-pick','Faction selection',PICKS,g.pick||'',{cls:'span2'})}
+    </div></div>
+    <div class="block"><h2 class="sec">How it went</h2><div class="grid3">
+      ${numF('f-rounds','Rounds played',g.rounds,'min="1" max="20" step="1"')}${numF('f-hours','Length in hours',g.hours,'min="0" step="0.5"')}${selectF('f-end','How it ended',ENDS,g.end||'')}
+      ${selectF('f-custodians','Took the Custodians token',mxp,g.custodians||'')}${selectF('f-mecatol','Held Mecatol at the end',mxp,g.mecatol||'')}${selectF('f-villain','Table villain',mxp,g.villain||'')}
+    </div>
+    <div class="fld"><label for="f-notes">Notes</label><textarea id="f-notes" placeholder="Betrayals, turning points, the law everyone regrets">${esc(g.notes||'')}</textarea></div></div>
+    <p class="error" id="formError" role="alert"></p>
+    <div class="actions"><button type="submit" class="btn gold" id="saveBtn">Save and download</button><a class="btn ghost" href="${editing?'#game-'+g.n:'#overview'}">Cancel</a>${editing?`<span id="delZone"><button type="button" class="btn danger" id="delBtn">Delete game</button></span>`:''}</div>
+  </form></section>`;
+}
+function syncPeople(){
+  const names=[...new Set([...document.querySelectorAll('#seats .p input')].map(i=>i.value.trim()).filter(Boolean))];
+  ['f-custodians','f-mecatol','f-villain'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const cur=el.value;
+    el.innerHTML=NA_OPT+names.map(n=>opt(n,cur)).join('');
+    if(cur&&!names.includes(cur))el.value='';
+  });
+}
+function readForm(form){
+  const val=id=>document.getElementById(id).value.trim();
+  const num=id=>{const v=val(id);return v===''?null:Number(v)};
+  const triV=id=>{const c=form.querySelector(`input[name="${id}"]:checked`);return!c||c.value==='na'?null:c.value==='yes'};
+  const pick=form.querySelector('input[name="winner"]:checked');
+  const canonical=f=>{const m=FACTIONS.find(x=>x.name.toLowerCase()===f.toLowerCase()||x.short.toLowerCase()===f.toLowerCase());return m?m.name:f};
+  const seats=[...form.querySelectorAll('.seat')].map(el=>{
+    const i=el.dataset.seat,f=val(`s${i}-f`);
+    return{p:val(`s${i}-p`),f:f?canonical(f):null,win:!!pick&&pick.value===i,vp:num(`s${i}-vp`),seat:num(`s${i}-seat`),color:val(`s${i}-c`)||null};
+  });
+  return{n:Number(form.dataset.n),date:val('f-date')||null,where:val('f-where')||null,vpLimit:num('f-vp'),pok:triV('f-pok'),codex:triV('f-codex'),te:triV('f-te'),map:val('f-map')||null,pick:val('f-pick')||null,rounds:num('f-rounds'),hours:num('f-hours'),end:val('f-end')||null,custodians:val('f-custodians')||null,mecatol:val('f-mecatol')||null,villain:val('f-villain')||null,notes:document.getElementById('f-notes').value.trim(),seats};
+}
+function validate(g){
+  if(g.seats.length<2)return'A game needs at least 2 players.';
+  if(g.seats.some(s=>!s.p))return'Add a name for every player, or remove the empty row.';
+  const names=g.seats.map(s=>s.p.toLowerCase());
+  if(new Set(names).size!==names.length)return'Each player can only appear once in a game.';
+  const fs=g.seats.map(s=>s.f).filter(Boolean);
+  if(new Set(fs).size!==fs.length)return'Each faction can only appear once in a game.';
+  return'';
+}
+
+/* ---------- saving: this page has no server, so a save downloads a new index.html to commit ---------- */
+const FONT_LINK='<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Saira:wght@400;500;600;700&family=Saira+Condensed:wght@500;600;700&family=Spectral:ital@1&display=swap">';
+const FAVICON='<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 88%27%3E%3Cpath fill=%27%23e9c46a%27 d=%27M25 0h50l25 44-25 44H25L0 44z%27/%3E%3C/svg%3E">';
+function buildDocument(ledger){
+  const close='<'+'/script>',styleClose='<'+'/style>';
+  const css=document.getElementById('css').textContent;
+  const engine=document.getElementById('engine').textContent;
+  const json=JSON.stringify(ledger,null,2).replace(/</g,'\\u003c');
+  return'<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n<meta name="robots" content="noindex">\n<title>Mecatol Archive</title>\n'
+    +FAVICON+'\n'+FONT_LINK+'\n<style id="css">'+css+styleClose+'\n</head>\n<body>\n<div id="app"></div>\n<script id="ledger" type="application/json">\n'+json+'\n'+close
+    +'\n<script id="engine">'+engine+close+'\n</body>\n</html>\n';
+}
+function commit(next,after,errEl){
+  errEl.textContent='';
+  const url=URL.createObjectURL(new Blob([buildDocument(next)],{type:'text/html'}));
+  const a=document.createElement('a');a.href=url;a.download='index.html';document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
+  L=next;A=analyse(L);
+  location.hash=after;
+  toast('Downloaded index.html. Upload it to your repo to publish this change.');
+}
+
+/* ---------- shell + router ---------- */
+function shell(){
+  document.getElementById('app').innerHTML=`<canvas id="stars" aria-hidden="true"></canvas>
+  <header class="bar"><div class="wrap"><a class="brand" href="#overview"><i></i>Mecatol Archive</a>
+    <nav aria-label="Sections"><a href="#overview" data-nav="overview">Galaxy</a><a href="#games" data-nav="games">Games</a><a href="#players" data-nav="players">Players</a><a href="#factions" data-nav="factions">Factions</a></nav>
+    <a class="btn gold" id="logBtn" href="#log" hidden>Log a game</a></div></header>
+  <main class="wrap" id="view"></main>
+  <footer><div class="wrap"><span>Twilight Imperium 4 at the table of ${esc(listing(A.players.map(p=>p.name)))}</span><span id="roNote">Unofficial fan record. Twilight Imperium belongs to Fantasy Flight Games.</span></div></footer>
+  <div id="tip" hidden></div><div id="toast" hidden role="status"></div>`;
+  stars();
+}
+function stars(){
+  const c=document.getElementById('stars');if(!c)return;
+  const w=c.width=innerWidth,h=c.height=innerHeight,x=c.getContext('2d');
+  let seed=4;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  for(let i=0;i<Math.round(w*h/9000);i++){x.fillStyle=`rgba(214,224,255,${.12+r()*.45})`;const s=r()<.08?1.6:1;x.fillRect(r()*w,r()*h,s,s)}
+}
+function setWriterUI(){const b=document.getElementById('logBtn');if(b)b.hidden=!writer}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>{t.hidden=true},3600)}
+function route(){
+  const h=decodeURIComponent(location.hash.slice(1))||'overview';
+  const view=document.getElementById('view');
+  let m,html,section=h;
+  if(h==='overview')html=vOverview();
+  else if(h==='games')html=vGames();
+  else if(h==='players')html=vPlayers();
+  else if(h==='factions')html=vFactions();
+  else if(h==='log'){html=vForm(null);section='games'}
+  else if((m=h.match(/^game-(\d+)$/))){html=vGame(Number(m[1]));section='games'}
+  else if((m=h.match(/^edit-(\d+)$/))){html=vForm(Number(m[1]));section='games'}
+  else if((m=h.match(/^player-(.+)$/))){html=vPlayer(m[1]);section='players'}
+  else if((m=h.match(/^faction-(.+)$/))){html=vFaction(m[1]);section='factions'}
+  else{html=vOverview();section='overview'}
+  view.innerHTML=html;
+  if(h==='overview')introPlayed=true;
+  document.querySelectorAll('nav a').forEach(a=>{if(a.dataset.nav===section)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  hideTip();
+  scrollTo(0,0);
+}
+
+/* tooltips, map highlight, form events: delegated once */
+function hideTip(){const t=document.getElementById('tip');if(t)t.hidden=true}
+function showTip(el){
+  const t=document.getElementById('tip'),txt=el.getAttribute('data-tip');if(!t||!txt)return;
+  t.textContent=txt;t.hidden=false;
+  const r=el.getBoundingClientRect(),w=t.offsetWidth,h=t.offsetHeight;
+  t.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left+r.width/2-w/2))+'px';
+  t.style.top=(r.top-h-8<8?r.bottom+8:r.top-h-8)+'px';
+}
+function highlight(el){
+  const id=el.getAttribute('data-player');if(!id)return;
+  const svg=el.closest('svg');svg.style.setProperty('--hl',el.getAttribute('data-c'));
+  svg.querySelectorAll('[data-by]').forEach(h=>h.classList.toggle('hl',h.getAttribute('data-by').split(' ').includes(id)));
+}
+function clearHighlight(){document.querySelectorAll('.hx.hl').forEach(h=>h.classList.remove('hl'))}
+function bind(){
+  const over=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t){showTip(t);highlight(t)}};
+  const out=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t){hideTip();clearHighlight()}};
+  document.addEventListener('mouseover',over);document.addEventListener('mouseout',out);
+  document.addEventListener('focusin',over);document.addEventListener('focusout',out);
+  addEventListener('scroll',hideTip,{passive:true});
+  addEventListener('hashchange',route);
+  addEventListener('resize',stars);
+  document.addEventListener('click',e=>{
+    const set=e.target.closest('[data-set]');
+    if(set){setFilter=set.dataset.set;route();return}
+    const drop=e.target.closest('[data-drop]');
+    if(drop){const rows=document.querySelectorAll('.seat');if(rows.length>2){document.querySelector(`.seat[data-seat="${drop.dataset.drop}"]`).remove();syncPeople()}return}
+    if(e.target.id==='addSeat'){
+      const box=document.getElementById('seats');
+      if(box.querySelectorAll('.seat').length>=MAX_SEATS){document.getElementById('formError').textContent=`A game can have up to ${MAX_SEATS} players.`;return}
+      box.insertAdjacentHTML('beforeend',seatRow({}));return;
+    }
+    if(e.target.id==='delBtn'){
+      const n=document.getElementById('gameForm').dataset.n;
+      document.getElementById('delZone').innerHTML=`<span class="actions"><span>Delete game ${esc(n)} for good?</span><button type="button" class="btn danger" id="delYes">Yes, delete</button><button type="button" class="btn ghost" id="delNo">Keep it</button></span>`;
+      return;
+    }
+    if(e.target.id==='delNo'){document.getElementById('delZone').innerHTML='<button type="button" class="btn danger" id="delBtn">Delete game</button>';return}
+    if(e.target.id==='delYes'){
+      const n=Number(document.getElementById('gameForm').dataset.n);
+      commit({...L,games:L.games.filter(g=>g.n!==n)},'games',document.getElementById('formError'),e.target);
+    }
+  });
+  document.addEventListener('input',e=>{if(e.target.closest&&e.target.closest('.seat .p'))syncPeople()});
+  document.addEventListener('submit',e=>{
+    if(e.target.id!=='gameForm')return;
+    e.preventDefault();
+    const g=readForm(e.target),err=validate(g),box=document.getElementById('formError');
+    if(err){box.textContent=err;return}
+    const games=e.target.dataset.editing==='true'?L.games.map(x=>x.n===g.n?g:x):[...L.games,g];
+    commit({...L,games},'game-'+g.n,box,document.getElementById('saveBtn'));
+  });
+}
+function connect(){
+  const enter=()=>{
+    if(location.hash!=='#keeper')return false;
+    try{sessionStorage.setItem('ma-keeper','1')}catch(_){}
+    writer=true;return true;
+  };
+  let on=false;try{on=sessionStorage.getItem('ma-keeper')==='1'}catch(_){}
+  if(on)writer=true;
+  const was=enter();
+  const showEditing=()=>{setWriterUI();document.getElementById('roNote').textContent='Editing mode: saves download a new index.html. Nothing changes online until you upload it.'};
+  addEventListener('hashchange',()=>{if(enter()){showEditing();location.hash='overview'}});
+  if(writer)showEditing();
+  if(was)location.hash='overview';else if(writer)route();
+}
+
+/* boot */
+shell();bind();
+try{const a=sessionStorage.getItem('ma-after');if(a){sessionStorage.removeItem('ma-after');if(!location.hash)location.hash=a}}catch(_){}
+route();
+connect();
+})();
+</script>
+</body>
+</html>
